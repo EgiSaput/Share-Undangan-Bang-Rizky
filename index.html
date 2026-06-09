@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulk WA Sender — Undangan Rizky & Kyla</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+/* ═══════════════════════════════════
+   ROOT & RESET
+═══════════════════════════════════ */
+:root {
+  --bg:        #1a1008;
+  --bg2:       #221508;
+  --card:      #2a1c0c;
+  --card2:     #321f0e;
+  --gold:      #C9A052;
+  --gold-lt:   #E0C278;
+  --gold-dk:   #A07835;
+  --gold-shine:#F0D890;
+  --ivory:     #FDFAF5;
+  --text-s:    #C8A882;
+  --text-xs:   #8A6448;
+  --green:     #25D366;
+  --green-dk:  #128C7E;
+  --red:       #e05050;
+  --border:    rgba(201,160,82,0.18);
+  --radius:    14px;
+  --shadow:    0 8px 40px rgba(0,0,0,0.4);
+}
+
+*, *::before, *::after {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg);
+  color: var(--ivory);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 15%, rgba(201,160,82,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 85%, rgba(160,120,53,0.05) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: inherit; }
+input, textarea { font-family: inherit; }
+
+/* ═══════════════════════════════════
+   LAYOUT
+═══════════════════════════════════ */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 940px; margin: 0 auto;
+  padding: 2.5rem 1.4rem 5rem;
+}
+
+/* ═══════════════════════════════════
+   HEADER
+═══════════════════════════════════ */
+.header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.header-eyebrow {
+  font-size: 0.58rem;
+  letter-spacing: 0.65em;
+  text-transform: uppercase;
+  color: var(--gold-dk);
+  margin-bottom: 0.7rem;
+}
+
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-style: italic;
+  color: var(--gold-lt);
+  line-height: 1.15;
+  margin-bottom: 0.3rem;
+}
+
+.header-sub {
+  font-size: 0.72rem;
+  color: var(--text-xs);
+  line-height: 1.8;
+}
+
+.divider {
+  display: flex; align-items: center;
+  gap: 1rem; margin: 1.2rem auto;
+  max-width: 260px;
+}
+.divider-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,160,82,0.4), transparent);
+}
+.divider-icon { color: var(--gold); font-size: 0.65rem; }
+
+/* ═══════════════════════════════════
+   STATS
+═══════════════════════════════════ */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-box::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold-dk), var(--gold-lt), var(--gold-dk));
+}
+
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem; font-weight: 600;
+  color: var(--gold-lt);
+  display: block; line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.stat-label {
+  font-size: 0.58rem;
+  color: var(--text-xs);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════
+   UPLOAD ZONE
+═══════════════════════════════════ */
+.upload-zone {
+  border: 1.5px dashed rgba(201,160,82,0.3);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  background: var(--card);
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.upload-zone:hover,
+.upload-zone.drag {
+  border-color: var(--gold);
+  background: var(--card2);
+}
+
+.upload-zone input[type="file"] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer;
+  width: 100%; height: 100%;
+}
+
+.upload-icon {
+  font-size: 2.8rem;
+  color: var(--gold-dk);
+  margin-bottom: 0.8rem;
+  display: block;
+}
+
+.upload-zone h3 {
+  font-size: 1rem;
+  color: var(--gold-lt);
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+}
+
+.upload-zone p {
+  font-size: 0.72rem;
+  color: var(--text-xs);
+  line-height: 1.8;
+}
+
+.upload-zone p strong {
+  color: var(--gold);
+}
+
+.btn-template {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  margin-top: 1.2rem;
+  padding: 0.5rem 1.3rem;
+  border: 1px solid rgba(201,160,82,0.35);
+  border-radius: 50px;
+  color: var(--gold);
+  font-size: 0.65rem; letter-spacing: 0.12em;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative; z-index: 2;
+}
+
+.btn-template:hover {
+  background: rgba(201,160,82,0.1);
+  border-color: var(--gold);
+}
+
+/* ═══════════════════════════════════
+   OR DIVIDER
+═══════════════════════════════════ */
+.or-divider {
+  display: flex; align-items: center;
+  gap: 1rem; margin: 1.4rem 0;
+}
+.or-line { flex: 1; height: 1px; background: var(--border); }
+.or-text {
+  font-size: 0.58rem; letter-spacing: 0.3em;
+  color: var(--text-xs); white-space: nowrap;
+}
+
+/* ═══════════════════════════════════
+   MANUAL INPUT
+═══════════════════════════════════ */
+.manual-input {
+  display: flex; gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.manual-input input {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.8rem 1.1rem;
+  color: var(--ivory);
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.manual-input input:focus {
+  border-color: var(--gold-dk);
+}
+
+.manual-input input::placeholder {
+  color: var(--text-xs);
+}
+
+.btn-add {
+  padding: 0.8rem 1.4rem;
+  background: linear-gradient(135deg, var(--gold-dk), var(--gold));
+  border: none; border-radius: 10px;
+  color: var(--bg);
+  font-size: 0.78rem; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+
+.btn-add:hover { transform: scale(1.03); }
+
+/* ═══════════════════════════════════
+   PREVIEW BOX
+═══════════════════════════════════ */
+.preview-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 1.5rem;
+  position: relative; overflow: hidden;
+}
+
+.preview-box::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--green-dk), var(--green));
+}
+
+.preview-label {
+  font-size: 0.58rem; letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold-dk); margin-bottom: 0.9rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.preview-label i { color: var(--green); }
+
+.preview-msg {
+  font-size: 0.73rem;
+  color: var(--text-s);
+  line-height: 1.95;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.preview-msg strong { color: var(--gold-lt); font-weight: 600; }
+.preview-msg em { color: var(--text-xs); font-style: italic; }
+.preview-msg .link-color { color: #5ab4f5; }
+
+/* ═══════════════════════════════════
+   TABLE
+═══════════════════════════════════ */
+.table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 44px 1fr 110px 1fr 100px;
+  background: rgba(201,160,82,0.07);
+  padding: 0.85rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.th {
+  font-size: 0.58rem; letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold-dk); font-weight: 600;
+}
+
+.table-body {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.table-body::-webkit-scrollbar { width: 4px; }
+.table-body::-webkit-scrollbar-track { background: transparent; }
+.table-body::-webkit-scrollbar-thumb {
+  background: rgba(201,160,82,0.25);
+  border-radius: 2px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 110px 1fr 100px;
+  padding: 0.85rem 1.2rem;
+  border-bottom: 1px solid rgba(201,160,82,0.05);
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.table-row:last-child { border-bottom: none; }
+.table-row:hover { background: rgba(201,160,82,0.035); }
+
+.row-num {
+  font-size: 0.68rem;
+  color: var(--text-xs);
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.row-name {
+  font-size: 0.8rem;
+  color: var(--ivory);
+  padding-right: 0.5rem;
+  word-break: break-word;
+}
+
+.badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.6rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 50px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-wait {
+  background: rgba(201,160,82,0.12);
+  color: var(--gold);
+  border: 1px solid rgba(201,160,82,0.2);
+}
+
+.badge-sent {
+  background: rgba(37,211,102,0.12);
+  color: #25D366;
+  border: 1px solid rgba(37,211,102,0.2);
+}
+
+.row-link {
+  font-size: 0.6rem;
+  color: var(--text-xs);
+  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 0.5rem;
+}
+
+.row-actions {
+  display: flex; gap: 0.4rem; align-items: center;
+  justify-content: flex-end;
+}
+
+.btn-send {
+  padding: 0.38rem 0.85rem;
+  background: linear-gradient(135deg, var(--green-dk), var(--green));
+  border: none; border-radius: 8px;
+  color: #fff; font-size: 0.62rem; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.btn-send:hover { transform: scale(1.06); }
+
+.btn-send.sent {
+  background: rgba(37,211,102,0.1);
+  color: var(--green);
+  border: 1px solid rgba(37,211,102,0.25);
+}
+
+.btn-send.sent:hover { transform: none; opacity: 0.9; }
+
+.btn-del {
+  background: transparent; border: none;
+  color: rgba(224,80,80,0.45);
+  cursor: pointer; font-size: 0.72rem;
+  padding: 0.25rem;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.btn-del:hover { color: var(--red); }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3.5rem 1rem;
+  color: var(--text-xs);
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 0.78rem;
+  line-height: 2;
+}
+
+/* ═══════════════════════════════════
+   ACTION BAR
+═══════════════════════════════════ */
+.action-bar {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.4rem;
+}
+
+.action-left {
+  display: flex; gap: 0.8rem; flex-wrap: wrap;
+  flex: 1;
+}
+
+.btn-next {
+  padding: 0.85rem 2rem;
+  background: linear-gradient(135deg, var(--green-dk), var(--green));
+  border: none; border-radius: 10px;
+  color: #fff; font-size: 0.8rem; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: flex; align-items: center; gap: 0.6rem;
+  box-shadow: 0 4px 18px rgba(37,211,102,0.25);
+}
+
+.btn-next:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 24px rgba(37,211,102,0.35);
+}
+
+.btn-next:disabled {
+  opacity: 0.35; transform: none;
+  cursor: not-allowed; box-shadow: none;
+}
+
+.btn-reset {
+  padding: 0.85rem 1.4rem;
+  background: transparent;
+  border: 1px solid rgba(224,80,80,0.28);
+  border-radius: 10px;
+  color: rgba(224,80,80,0.75);
+  font-size: 0.75rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.btn-reset:hover {
+  background: rgba(224,80,80,0.08);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.progress-area { flex: 1; min-width: 160px; }
+
+.progress-label {
+  font-size: 0.6rem; color: var(--text-xs);
+  margin-bottom: 0.45rem;
+  letter-spacing: 0.12em;
+}
+
+.progress-track {
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px; height: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-dk), var(--green));
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ═══════════════════════════════════
+   TOAST
+═══════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 2rem; left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: rgba(18,10,2,0.95);
+  border: 1px solid rgba(201,160,82,0.28);
+  color: var(--gold-lt);
+  font-size: 0.72rem;
+  padding: 0.72rem 1.8rem;
+  border-radius: 50px;
+  opacity: 0;
+  transition: all 0.38s cubic-bezier(0.16,1,0.3,1);
+  z-index: 9999; pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ═══════════════════════════════════
+   PANDUAN
+═══════════════════════════════════ */
+.guide {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.6rem;
+  margin-top: 2rem;
+}
+
+.guide-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--gold-lt);
+  margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.guide-steps { list-style: none; }
+
+.guide-steps li {
+  display: flex; gap: 0.8rem;
+  align-items: flex-start;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(201,160,82,0.05);
+  font-size: 0.74rem;
+  color: var(--text-s);
+  line-height: 1.7;
+}
+
+.guide-steps li:last-child { border-bottom: none; }
+
+.step-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dk), var(--gold));
+  color: var(--bg);
+  font-size: 0.62rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+
+/* ═══════════════════════════════════
+   RESPONSIVE MOBILE
+═══════════════════════════════════ */
+@media (max-width: 640px) {
+  .wrap { padding: 1.5rem 1rem 4rem; }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 36px 1fr 95px 90px;
+  }
+
+  /* Sembunyikan kolom link di mobile */
+  .th:nth-child(4),
+  .row-link { display: none; }
+
+  .stats { gap: 0.6rem; }
+  .stat-num { font-size: 1.7rem; }
+
+  .action-bar { flex-direction: column; }
+  .action-left { width: 100%; }
+  .btn-next { width: 100%; justify-content: center; }
+  .progress-area { width: 100%; }
+  .manual-input { flex-direction: column; }
+  .btn-add { width: 100%; justify-content: center; }
+  .table-header { padding: 0.7rem 0.9rem; }
+  .table-row { padding: 0.7rem 0.9rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <p class="header-eyebrow">✦ Tools Pengirim Undangan ✦</p>
+    <h1 class="header-title">Bulk WA Sender</h1>
+    <p class="header-sub">Rizky &amp; Kyla Intan · 14 Juni 2026</p>
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-icon"><i class="fas fa-heart"></i></span>
+      <div class="divider-line"></div>
+    </div>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div class="stats">
+    <div class="stat-box">
+      <span class="stat-num" id="stat-total">0</span>
+      <span class="stat-label">Total Tamu</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-num" id="stat-sent" style="color:#25D366">0</span>
+      <span class="stat-label">Terkirim</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-num" id="stat-left" style="color:var(--gold)">0</span>
+      <span class="stat-label">Belum Kirim</span>
+    </div>
+  </div>
+
+  <!-- ── UPLOAD EXCEL ── -->
+  <div class="upload-zone" id="upload-zone">
+    <input type="file" id="file-input" accept=".xlsx,.xls,.csv">
+    <i class="fas fa-file-excel upload-icon"></i>
+    <h3>Upload File Excel / CSV</h3>
+    <p>Drag &amp; drop atau klik untuk pilih file<br>
+       Isi kolom <strong>Nama</strong> saja, satu nama per baris</p>
+    <button class="btn-template" id="btn-template">
+      <i class="fas fa-download"></i> Download Template Excel
+    </button>
+  </div>
+
+  <!-- ── ATAU MANUAL ── -->
+  <div class="or-divider">
+    <div class="or-line"></div>
+    <span class="or-text">ATAU TAMBAH MANUAL</span>
+    <div class="or-line"></div>
+  </div>
+
+  <div class="manual-input">
+    <input type="text" id="manual-name"
+      placeholder="Contoh: Bapak Ahmad Fauzi / Keluarga Budi">
+    <button class="btn-add" id="btn-add">
+      <i class="fas fa-plus"></i> Tambah
+    </button>
+  </div>
+
+  <!-- ── PREVIEW PESAN ── -->
+  <div class="preview-box">
+    <p class="preview-label">
+      <i class="fab fa-whatsapp"></i> Preview Pesan WA
+    </p>
+    <p class="preview-msg" id="preview-msg"></p>
+  </div>
+
+  <!-- ── TABLE TAMU ── -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <span class="th">#</span>
+      <span class="th">Nama Tamu</span>
+      <span class="th">Status</span>
+      <span class="th">Link Personal</span>
+      <span class="th" style="text-align:right">Aksi</span>
+    </div>
+    <div class="table-body" id="table-body">
+      <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <p>Belum ada tamu undangan.<br>
+           Upload Excel atau tambah manual di atas.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ACTION BAR ── -->
+  <div class="action-bar">
+    <div class="action-left">
+      <button class="btn-next" id="btn-next" disabled>
+        <i class="fab fa-whatsapp"></i> Kirim ke Berikutnya
+      </button>
+      <button class="btn-reset" id="btn-reset">
+        <i class="fas fa-trash-alt"></i> Reset
+      </button>
+    </div>
+    <div class="progress-area">
+      <p class="progress-label" id="progress-label">0 / 0 terkirim</p>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANDUAN ── -->
+  <div class="guide">
+    <h3 class="guide-title"><i class="fas fa-book-open" style="color:var(--gold-dk)"></i> Cara Pakai</h3>
+    <ol class="guide-steps">
+      <li>
+        <span class="step-num">1</span>
+        <span>Download template Excel → isi nama tamu di kolom A (satu nama per baris) → save file</span>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <span>Upload file Excel/CSV atau tambah nama tamu satu per satu secara manual</span>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <span>Klik <strong style="color:var(--green)">Kirim ke Berikutnya</strong> → WhatsApp otomatis terbuka dengan pesan &amp; link sudah terisi → pilih kontak tamu → Send</span>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <span>Kembali ke halaman ini → klik lagi untuk tamu berikutnya. Status otomatis berubah jadi <strong style="color:var(--green)">Terkirim</strong></span>
+      </li>
+      <li>
+        <span class="step-num">5</span>
+        <span>Data tersimpan di browser — aman refresh halaman. Klik Reset hanya jika ingin mulai dari awal</span>
+      </li>
+    </ol>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════ -->
+<script>
+/* ═══════════════════════════════════════════════
+   KONFIGURASI — SESUAIKAN DI SINI
+═══════════════════════════════════════════════ */
+const BASE_URL = 'https://rizy-kyla.github.io/Rizky-Kyla-2026/';
+
+/* ═══════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════ */
+let guests = []; // array of { name: string, sent: boolean }
+
+/* ═══════════════════════════════════════════════
+   BUILDER PESAN WA
+═══════════════════════════════════════════════ */
+function buildMessage(name) {
+  const url = BASE_URL + '?to=' + encodeURIComponent(name);
+  return (
+    '_Assalamualaikum Warahmatullahi Wabarakatuh_ \uD83D\uDE4F\n\n' +
+    'Tanpa mengurangi rasa hormat, perkenankan kami mengundang ' +
+    'Bapak/Ibu/Saudara/i *' + name + '* untuk menghadiri acara kami.\n\n' +
+    '*Berikut link undangan kami*, untuk info lengkap dari acara bisa kunjungi :\n' +
+    url + '\n\n' +
+    'Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i ' +
+    'berkenan untuk hadir dan memberikan doa restu.\n\n' +
+    '_Mohon maaf perihal undangan hanya di bagikan melalui pesan ini._\n\n' +
+    '*Note:*\n' +
+    '_Disarankan akses melalui Browser Chrome/Safari dan nonaktifkan ' +
+    'dark mode / mode gelap_ \uD83C\uDF19\n\n' +
+    'Terima kasih banyak atas perhatiannya.\n' +
+    '_Wassalamualaikum Warahmatullahi Wabarakatuh_'
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER PREVIEW
+═══════════════════════════════════════════════ */
+function renderPreview() {
+  var sampleName = '';
+  for (var i = 0; i < guests.length; i++) {
+    if (!guests[i].sent) { sampleName = guests[i].name; break; }
+  }
+  if (!sampleName && guests.length > 0) sampleName = guests[0].name;
+  if (!sampleName) sampleName = 'Nama Tamu';
+
+  var raw = buildMessage(sampleName);
+  var url = BASE_URL + '?to=' + encodeURIComponent(sampleName);
+
+  var html = raw
+    .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+    .replace(/_(.*?)_/g, '<em>$1</em>')
+    .replace(url, '<span class="link-color">' + url + '</span>');
+
+  document.getElementById('preview-msg').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER STATS
+═══════════════════════════════════════════════ */
+function renderStats() {
+  var total = guests.length;
+  var sent  = 0;
+  for (var i = 0; i < guests.length; i++) { if (guests[i].sent) sent++; }
+  var left  = total - sent;
+  var pct   = total > 0 ? Math.round((sent / total) * 100) : 0;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-sent').textContent  = sent;
+  document.getElementById('stat-left').textContent  = left;
+  document.getElementById('progress-label').textContent = sent + ' / ' + total + ' terkirim (' + pct + '%)';
+  document.getElementById('progress-fill').style.width  = pct + '%';
+  document.getElementById('btn-next').disabled = (total === 0 || sent === total);
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER TABLE
+═══════════════════════════════════════════════ */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function renderTable() {
+  var body = document.getElementById('table-body');
+
+  if (guests.length === 0) {
+    body.innerHTML =
+      '<div class="empty-state">' +
+        '<i class="fas fa-users"></i>' +
+        '<p>Belum ada tamu undangan.<br>Upload Excel atau tambah manual di atas.</p>' +
+      '</div>';
+    renderStats();
+    renderPreview();
+    return;
+  }
+
+  var rows = '';
+  for (var i = 0; i < guests.length; i++) {
+    var g    = guests[i];
+    var url  = BASE_URL + '?to=' + encodeURIComponent(g.name);
+    var shortUrl = '...?to=' + g.name.substring(0, 16) + (g.name.length > 16 ? '...' : '');
+    var badge = g.sent
+      ? '<span class="badge badge-sent"><i class="fas fa-check-circle"></i> Terkirim</span>'
+      : '<span class="badge badge-wait"><i class="fas fa-clock"></i> Menunggu</span>';
+    var btnSend = g.sent
+      ? '<button class="btn-send sent" data-idx="' + i + '"><i class="fab fa-whatsapp"></i> Lagi</button>'
+      : '<button class="btn-send"       data-idx="' + i + '"><i class="fab fa-whatsapp"></i> Kirim</button>';
+
+    rows +=
+      '<div class="table-row" id="row-' + i + '">' +
+        '<span class="row-num">' + (i + 1) + '</span>' +
+        '<span class="row-name">' + escapeHtml(g.name) + '</span>' +
+        badge +
+        '<span class="row-link" title="' + escapeHtml(url) + '">' + escapeHtml(shortUrl) + '</span>' +
+        '<div class="row-actions">' +
+          btnSend +
+          '<button class="btn-del" data-idx="' + i + '" title="Hapus"><i class="fas fa-times"></i></button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  body.innerHTML = rows;
+
+  /* Event listeners untuk tombol di dalam tabel */
+  body.querySelectorAll('.btn-send').forEach(function(btn) {
+    btn.addEventListener('click', function() { sendOne(parseInt(this.dataset.idx)); });
+  });
+  body.querySelectorAll('.btn-del').forEach(function(btn) {
+    btn.addEventListener('click', function() { deleteGuest(parseInt(this.dataset.idx)); });
+  });
+
+  renderStats();
+  renderPreview();
+}
+
+/* ═══════════════════════════════════════════════
+   KIRIM SATU
+═══════════════════════════════════════════════ */
+function sendOne(idx) {
+  var g   = guests[idx];
+  var msg = buildMessage(g.name);
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  guests[idx].sent = true;
+  saveData();
+  renderTable();
+  showToast('\u2713 WA dibuka untuk ' + g.name);
+
+  /* Scroll ke baris */
+  setTimeout(function() {
+    var row = document.getElementById('row-' + idx);
+    if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 300);
+}
+
+/* ═══════════════════════════════════════════════
+   KIRIM BERIKUTNYA
+═══════════════════════════════════════════════ */
+function sendNext() {
+  var idx = -1;
+  for (var i = 0; i < guests.length; i++) {
+    if (!guests[i].sent) { idx = i; break; }
+  }
+  if (idx === -1) { showToast('\uD83C\uDF89 Semua undangan sudah terkirim!'); return; }
+  sendOne(idx);
+}
+
+/* ═══════════════════════════════════════════════
+   TAMBAH MANUAL
+═══════════════════════════════════════════════ */
+function addManual() {
+  var inp  = document.getElementById('manual-name');
+  var name = inp.value.trim();
+  if (!name) { showToast('\u26A0 Nama tidak boleh kosong'); return; }
+  guests.push({ name: name, sent: false });
+  inp.value = '';
+  saveData();
+  renderTable();
+  showToast('\u2713 ' + name + ' ditambahkan');
+}
+
+/* ═══════════════════════════════════════════════
+   HAPUS SATU TAMU
+═══════════════════════════════════════════════ */
+function deleteGuest(idx) {
+  var name = guests[idx].name;
+  guests.splice(idx, 1);
+  saveData();
+  renderTable();
+  showToast('Dihapus: ' + name);
+}
+
+/* ═══════════════════════════════════════════════
+   RESET SEMUA
+═══════════════════════════════════════════════ */
+function resetAll() {
+  if (guests.length === 0) return;
+  if (!confirm('Yakin reset semua data tamu? Aksi ini tidak bisa dibatalkan.')) return;
+  guests = [];
+  saveData();
+  renderTable();
+  showToast('\u2713 Data direset');
+}
+
+/* ═══════════════════════════════════════════════
+   IMPORT FILE
+═══════════════════════════════════════════════ */
+function handleFile(file) {
+  if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'csv') {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var lines = e.target.result.split(/\r?\n/);
+      var added = 0;
+      for (var i = 0; i < lines.length; i++) {
+        /* ambil kolom pertama, buang quote */
+        var col  = lines[i].split(/[,;]/)[0];
+        var name = col.replace(/["']/g, '').trim();
+        var lo   = name.toLowerCase();
+        if (name && lo !== 'nama' && lo !== 'name') {
+          guests.push({ name: name, sent: false });
+          added++;
+        }
+      }
+      saveData(); renderTable();
+      showToast('\u2713 ' + added + ' tamu diimport dari CSV');
+    };
+    reader.readAsText(file);
+
+  } else {
+    /* Excel via SheetJS */
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var wb   = XLSX.read(e.target.result, { type: 'array' });
+      var ws   = wb.Sheets[wb.SheetNames[0]];
+      var data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      var added = 0;
+      for (var r = 0; r < data.length; r++) {
+        var row = data[r];
+        if (!row || !row[0]) continue;
+        var name = String(row[0]).trim();
+        var lo   = name.toLowerCase();
+        if (r === 0 && (lo === 'nama' || lo === 'name')) continue; /* skip header */
+        if (name) { guests.push({ name: name, sent: false }); added++; }
+      }
+      saveData(); renderTable();
+      showToast('\u2713 ' + added + ' tamu diimport dari Excel');
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   DOWNLOAD TEMPLATE EXCEL
+═══════════════════════════════════════════════ */
+function downloadTemplate(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  var data = [
+    ['Nama'],
+    ['Bapak Ahmad Fauzi'],
+    ['Ibu Sari Dewi'],
+    ['Keluarga Budi Santoso'],
+    ['Saudara Roni Hermawan'],
+    ['Ibu Hj. Aminah']
+  ];
+  var ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{ wch: 32 }];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Tamu Undangan');
+  XLSX.writeFile(wb, 'template-tamu-undangan.xlsx');
+  showToast('\u2713 Template didownload');
+}
+
+/* ═══════════════════════════════════════════════
+   LOCAL STORAGE
+═══════════════════════════════════════════════ */
+function saveData() {
+  try { localStorage.setItem('rk_guests', JSON.stringify(guests)); } catch(e) {}
+}
+
+function loadData() {
+  try {
+    var raw = localStorage.getItem('rk_guests');
+    if (raw) guests = JSON.parse(raw);
+  } catch(e) { guests = []; }
+}
+
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+var toastTimer = null;
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { el.classList.remove('show'); }, 2600);
+}
+
+/* ═══════════════════════════════════════════════
+   EVENT LISTENERS
+═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+
+  /* Load data tersimpan */
+  loadData();
+  renderTable();
+
+  /* Tombol kirim berikutnya */
+  document.getElementById('btn-next').addEventListener('click', sendNext);
+
+  /* Tombol reset */
+  document.getElementById('btn-reset').addEventListener('click', resetAll);
+
+  /* Tombol tambah manual */
+  document.getElementById('btn-add').addEventListener('click', addManual);
+
+  /* Enter di input manual */
+  document.getElementById('manual-name').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') addManual();
+  });
+
+  /* Upload file */
+  var fileInput = document.getElementById('file-input');
+  fileInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) handleFile(this.files[0]);
+    this.value = ''; /* reset supaya bisa upload file sama lagi */
+  });
+
+  /* Download template — harus prevent agar tidak trigger file input */
+  document.getElementById('btn-template').addEventListener('click', downloadTemplate);
+
+  /* Drag & Drop */
+  var zone = document.getElementById('upload-zone');
+
+  zone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    zone.classList.add('drag');
+  });
+
+  zone.addEventListener('dragleave', function(e) {
+    if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag');
+  });
+
+  zone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    zone.classList.remove('drag');
+    var f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+
+});
+</script>
+
+</body>
+</html>
